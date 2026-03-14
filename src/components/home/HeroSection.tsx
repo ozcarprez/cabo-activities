@@ -29,11 +29,6 @@ export function HeroSection() {
             <span className="text-cabo-turquoise">Cabo San Lucas</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-white/70 max-w-xl mb-10 leading-relaxed opacity-0 animate-slide-up stagger-2">
-            From thrilling deep-sea fishing to magical sunset sails past El Arco — 
-            find and book the adventure of a lifetime.
-          </p>
-
           {/* Search bar */}
           <div className="glass rounded-2xl p-2 sm:p-3 max-w-3xl opacity-0 animate-slide-up stagger-3 shadow-2xl shadow-black/20">
             <div className="flex flex-col sm:flex-row gap-2">
