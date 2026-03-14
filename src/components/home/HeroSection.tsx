@@ -16,16 +16,12 @@ export function HeroSection() {
           alt="El Arco de Cabo San Lucas"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-cabo-dark/60 via-cabo-dark/40 to-cabo-dark/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-cabo-dark/70 via-cabo-dark/20 to-cabo-dark/50" />
         <div className="absolute inset-0 bg-gradient-to-r from-cabo-ocean-deep/30 to-transparent" />
       </div>
 
-      {/* Floating decorative elements */}
-      <div className="absolute top-32 right-10 w-72 h-72 bg-cabo-turquoise/10 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-cabo-sunset/8 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
-
       {/* Content */}
-      <div className="relative z-10 section-padding w-full pt-24 pb-16">
+      <div className="relative z-10 section-padding w-full flex flex-col justify-end min-h-[92vh] pb-16">
         <div className="max-w-4xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 glass-dark rounded-full mb-8 opacity-0 animate-fade-in">
@@ -36,7 +32,7 @@ export function HeroSection() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white leading-[0.95] mb-6 opacity-0 animate-slide-up stagger-1">
+          <h1 className="font-display text-5xl sm:text-6xl md:text-6xl lg:text-7xl text-white leading-[0.95] mb-6 opacity-0 animate-slide-up stagger-1">
             Discover<br />
             <span className="text-cabo-turquoise">Cabo San Lucas</span>
           </h1>
@@ -108,7 +104,7 @@ export function HeroSection() {
         </div>
 
         {/* Stats bar */}
-        <div className="absolute bottom-8 left-0 right-0 section-padding">
+        <div className="mt-8">
           <div className="flex items-center gap-8 sm:gap-12 opacity-0 animate-fade-in stagger-5">
             {[
               { number: '10K+', label: 'Happy Travelers' },
