@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  TOURIST
+  OPERATOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  phone         String?
+  role          UserRole  @default(TOURIST)
+  companyName   String?
+  companyDesc   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  activities Activity[]
+  bookings   Booking[]
+  reviews    Review[]
+  accounts   Account[]
+  sessions   Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  nameEs      String
+  slug        String     @unique
+  description String?
+  icon        String?
+  image       String?
+  sortOrder   Int        @default(0)
+  activities  Activity[]
+
+  @@map("categories")
+}
+
+model Activity {
+  id              String   @id @default(cuid())
+  title           String
+  titleEs         String?
+  slug            String   @unique
+  description     String
+  descriptionEs   String?
+  shortDesc       String
+  highlights      String[] // What's included
+  notIncluded     String[] // What's NOT included
+  requirements    String[] // Requirements / what to bring
+  duration        Int      // Duration in minutes
+  maxCapacity     Int
+  priceAdult      Float
+  priceChild      Float?
+  priceCurrency   String   @default("USD")
+  images          String[]
+  mainImage       String
+  meetingPoint    String
+  meetingLat      Float?
+  meetingLng      Float?
+  cancellationPolicy String?
+  minAge          Int?
+  difficulty      String?  // easy, moderate, hard
+  languages       String[] @default(["en", "es"])
+  isActive        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  avgRating       Float    @default(0)
+  totalReviews    Int      @default(0)
+  totalBookings   Int      @default(0)
+  commissionRate  Float    @default(15) // Platform commission %
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  operatorId String
+  operator   User     @relation(fields: [operatorId], references: [id])
+
+  availabilities Availability[]
+  bookings       Booking[]
+  reviews        Review[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive, isFeatured])
+  @@map("activities")
+}
+
+model Availability {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  startTime   String   // "09:00"
+  endTime     String?  // "12:00"
+  totalSpots  Int
+  bookedSpots Int      @default(0)
+  priceOverride Float? // Optional price override for this date
+  isBlocked   Boolean  @default(false)
+  
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  bookingItems BookingItem[]
+
+  @@unique([activityId, date, startTime])
+  @@index([activityId, date])
+  @@map("availabilities")
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  bookingNumber   String        @unique
+  status          BookingStatus @default(PENDING)
+  totalAmount     Float
+  commissionAmount Float
+  operatorAmount  Float
+  currency        String        @default("USD")
+  guestName       String
+  guestEmail      String
+  guestPhone      String?
+  specialRequests String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id])
+
+  items    BookingItem[]
+  payment  Payment?
+  review   Review?
+
+  @@index([userId])
+  @@index([activityId])
+  @@index([bookingNumber])
+  @@map("bookings")
+}
+
+model BookingItem {
+  id             String @id @default(cuid())
+  adults         Int
+  children       Int    @default(0)
+  pricePerAdult  Float
+  pricePerChild  Float  @default(0)
+  subtotal       Float
+
+  bookingId      String
+  booking        Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  availabilityId String
+  availability   Availability @relation(fields: [availabilityId], references: [id])
+
+  @@map("booking_items")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  stripePaymentId   String?       @unique
+  stripeCustomerId  String?
+  amount            Float
+  currency          String        @default("USD")
+  status            PaymentStatus @default(PENDING)
+  method            String?
+  receiptUrl        String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5
+  title     String?
+  comment   String
+  images    String[]
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id])
+  bookingId  String   @unique
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+
+  @@index([activityId])
+  @@map("reviews")
+}
