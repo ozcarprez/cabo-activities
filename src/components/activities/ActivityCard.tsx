@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Clock, Users, Heart, MapPin } from 'lucide-react';
 import { Activity } from '@/lib/types';

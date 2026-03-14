@@ -1,3 +1,5 @@
+'use client';
+
 import { Shield, Zap, Heart, Headphones } from 'lucide-react';
 
 const features = [

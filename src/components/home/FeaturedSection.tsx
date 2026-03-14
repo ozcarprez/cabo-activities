@@ -1,3 +1,5 @@
+'use client';
+
 import { getFeaturedActivities } from '@/lib/sample-data';
 import { ActivityCard } from '@/components/activities/ActivityCard';
 
