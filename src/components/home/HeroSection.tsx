@@ -91,33 +91,6 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Quick category pills */}
-          <div className="flex flex-wrap gap-2 mt-6 opacity-0 animate-fade-in stagger-4">
-            <span className="text-sm text-white/40 py-1.5">Popular:</span>
-            {['Whale Watching', 'Sunset Sailing', 'Fishing', 'Snorkel', 'Tacos & Tequila'].map(tag => (
-              <a key={tag} href={`/activities?q=${encodeURIComponent(tag)}`}
-                className="px-3.5 py-1.5 text-sm text-white/70 border border-white/15 rounded-full hover:bg-white/10 hover:text-white transition-all cursor-pointer">
-                {tag}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats bar */}
-        <div className="mt-8">
-          <div className="flex items-center gap-8 sm:gap-12 opacity-0 animate-fade-in stagger-5">
-            {[
-              { number: '10K+', label: 'Happy Travelers' },
-              { number: '200+', label: 'Experiences' },
-              { number: '4.8', label: 'Avg Rating' },
-              { number: '50+', label: 'Local Operators' },
-            ].map(stat => (
-              <div key={stat.label} className="text-center sm:text-left">
-                <div className="text-xl sm:text-2xl font-bold text-white">{stat.number}</div>
-                <div className="text-xs text-white/40 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
