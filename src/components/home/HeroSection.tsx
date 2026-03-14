@@ -12,7 +12,7 @@ export function HeroSection() {
       {/* Background image */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=1920&q=80"
+          src="https://images.unsplash.com/photo-1585178667555-57d57e0a2035?w=1920&q=80"
           alt="El Arco de Cabo San Lucas"
           className="w-full h-full object-cover"
         />
