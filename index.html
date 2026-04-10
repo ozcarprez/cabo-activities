@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>tu.dev — Desarrollador Web Tijuana</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #080b0f;
+      --dark: #0e1117;
+      --panel: #131920;
+      --border: #1e2a36;
+      --border2: #2a3a4a;
+      --blue: #1a8fff;
+      --blue2: #0d6edc;
+      --blue-glow: rgba(26,143,255,0.15);
+      --cyan: #00d4ff;
+      --green: #00ff88;
+      --gray: #4a6280;
+      --gray2: #7a94ae;
+      --white: #e8f0f8;
+      --dim: #4a6070;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Space Grotesk', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--mono); background: var(--black); color: var(--white); overflow-x: hidden; line-height: 1.6; }
+
+    /* SCANLINES */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 52px;
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-left { display: flex; align-items: center; gap: 0; }
+    .nav-tab {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0 1.2rem; height: 52px;
+      font-size: 0.78rem; color: var(--gray2);
+      border-right: 1px solid var(--border);
+      cursor: default;
+    }
+    .nav-tab.active {
+      background: var(--black); color: var(--white);
+      border-bottom: 2px solid var(--blue);
+      margin-bottom: -1px;
+    }
+    .nav-tab .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+    .nav-tab .dot.green { background: var(--green); }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-right a { font-size: 0.75rem; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--blue); }
+    .nav-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--green); }
+    .nav-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+
+    /* HERO / TERMINAL */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      justify-content: center;
+      padding: 6rem 2rem 3rem;
+      position: relative;
+    }
+
+    .hero-container { 
+      max-width: 900px; 
+      width: 100%; 
+      margin: 0 auto;
+    }
+
+    .terminal-window {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(26,143,255,0.08), 0 0 0 1px var(--border);
+    }
+    .terminal-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+    }
+    .t-btn { width: 12px; height: 12px; border-radius: 50%; }
+    .t-btn.red { background: #ff5f57; }
+    .t-btn.yellow { background: #febc2e; }
+    .t-btn.green { background: #28c840; }
+    .t-title { font-size: 0.72rem; color: var(--gray); margin-left: 0.5rem; }
+    .terminal-body { padding: 1.8rem 2rem 2rem; }
+
+    .t-line { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.4rem; font-size: 0.88rem; }
+    .t-prompt { color: var(--blue); white-space: nowrap; }
+    .t-prompt span { color: var(--cyan); }
+    .t-cmd { color: var(--white); }
+    .t-out { color: var(--gray2); padding-left: 1.4rem; font-size: 0.85rem; margin-bottom: 0.3rem; }
+    .t-out.blue { color: var(--blue); }
+    .t-out.green { color: var(--green); }
+    .t-out.cyan { color: var(--cyan); }
+    .t-out.dim { color: var(--dim); }
+    .t-spacer { height: 0.8rem; }
+
+    .t-name {
+      font-family: var(--sans);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin: 1.2rem 0 0.5rem;
+    }
+    .t-name .accent { color: var(--blue); }
+    .t-role {
+      font-size: 0.9rem; color: var(--cyan);
+      margin-bottom: 1.5rem; letter-spacing: 0.05em;
+    }
+
+    .t-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1.2rem 0; }
+    .t-tag {
+      font-size: 0.72rem; padding: 0.2rem 0.7rem;
+      border: 1px solid var(--border2); color: var(--gray2);
+      border-radius: 3px; background: var(--dark);
+    }
+
+    .t-cursor {
+      display: inline-block; width: 10px; height: 1.1em;
+      background: var(--blue); margin-left: 2px;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .btn-term {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      font-family: var(--mono); font-size: 0.82rem;
+      border-radius: 4px; text-decoration: none; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-term.primary { background: var(--blue); color: var(--black); border: 1px solid var(--blue); font-weight: 700; }
+    .btn-term.primary:hover { background: var(--cyan); border-color: var(--cyan); }
+    .btn-term.ghost { background: transparent; color: var(--gray2); border: 1px solid var(--border2); }
+    .btn-term.ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* SECTION */
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .sec-header { margin-bottom: 2.5rem; }
+    .sec-label {
+      font-size: 0.72rem; color: var(--blue); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 0.5rem;
+    }
+    .sec-label::before { content: '// '; color: var(--dim); }
+    .sec-title {
+      font-family: var(--sans); font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700; color: var(--white); letter-spacing: -0.02em;
+    }
+    .divider { height: 1px; background: var(--border); margin: 0 2rem; }
+
+    /* PROYECTOS */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .project-card {
+      background: var(--panel);
+      padding: 1.8rem;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .project-card:hover { background: var(--dark); }
+    .project-card a { text-decoration: none; color: inherit; display: block; }
+    .p-num { font-size: 0.7rem; color: var(--dim); margin-bottom: 1rem; font-family: var(--mono); }
+    .p-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.8rem; }
+    .p-icon {
+      width: 40px; height: 40px; border-radius: 6px;
+      background: var(--blue-glow); border: 1px solid rgba(26,143,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .p-arrow { font-size: 1rem; color: var(--dim); transition: color 0.2s, transform 0.2s; }
+    .project-card:hover .p-arrow { color: var(--blue); transform: translate(2px, -2px); }
+    .p-title { font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 0.4rem; }
+    .p-desc { font-size: 0.8rem; color: var(--gray2); line-height: 1.65; margin-bottom: 1.2rem; }
+    .p-techs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .p-tech { font-size: 0.68rem; padding: 0.15rem 0.5rem; background: var(--dark); border: 1px solid var(--border2); color: var(--cyan); border-radius: 2px; }
+
+    /* SERVICIOS */
+    #servicios { background: var(--dark); }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .svc-card {
+      padding: 1.6rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .svc-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--blue), transparent);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .svc-card:hover { border-color: var(--border2); }
+    .svc-card:hover::before { opacity: 1; }
+    .svc-num { font-size: 0.68rem; color: var(--dim); margin-bottom: 1rem; }
+    .svc-card h3 { font-family: var(--sans); font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 0.6rem; }
+    .svc-card p { font-size: 0.8rem; color: var(--gray2); line-height: 1.65; }
+
+    /* ABOUT */
+    .about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+    .about-code {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .code-bar { background: var(--dark); border-bottom: 1px solid var(--border); padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .code-bar span { font-size: 0.72rem; color: var(--gray); }
+    .code-bar .lang { margin-left: auto; font-size: 0.68rem; color: var(--blue); }
+    .code-body { padding: 1.5rem; font-size: 0.8rem; line-height: 2; }
+    .c-kw { color: #c792ea; }
+    .c-fn { color: var(--blue); }
+    .c-str { color: var(--green); }
+    .c-prop { color: var(--cyan); }
+    .c-val { color: #f78c6c; }
+    .c-cm { color: var(--dim); }
+    .c-num { line-height: 2; color: var(--dim); font-size: 0.72rem; display: inline-block; width: 1.5rem; text-align: right; margin-right: 1rem; user-select: none; }
+
+    .about-stats { display: flex; flex-direction: column; gap: 1rem; }
+    .stat-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.2rem;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    }
+    .stat-val { font-family: var(--sans); font-size: 1.8rem; font-weight: 700; color: var(--blue); line-height: 1; min-width: 3rem; }
+    .stat-label { font-size: 0.8rem; color: var(--gray2); }
+
+    /* CONTACTO */
+    #contacto { background: var(--dark); }
+    .contact-terminal {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+      max-width: 640px; margin: 0 auto;
+    }
+    .contact-links-grid { padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .c-link {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.9rem 1rem;
+      background: var(--dark); border: 1px solid var(--border);
+      border-radius: 4px; text-decoration: none; color: var(--gray2);
+      font-size: 0.82rem; transition: border-color 0.2s, color 0.2s;
+    }
+    .c-link:hover { border-color: var(--blue); color: var(--white); }
+    .c-link .c-icon { font-size: 1rem; }
+    .c-link .c-arrow { margin-left: auto; font-size: 0.75rem; color: var(--dim); }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 1.5rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.72rem; color: var(--dim);
+    }
+    footer span { color: var(--blue); }
+
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 1rem; }
+      .nav-right { display: none; }
+      .hero { padding: 5rem 1rem 2rem; }
+      section { padding: 3rem 1rem; }
+      .divider { margin: 0 1rem; }
+      .about-layout { grid-template-columns: 1fr; }
+      .contact-links-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-left">
+      <div class="nav-tab active">
+        <span class="dot green"></span>
+        portfolio.html
+      </div>
+      <div class="nav-tab">
+        <span class="dot"></span>
+        proyectos/
+      </div>
+    </div>
+    <div class="nav-right">
+      <a href="#proyectos">proyectos</a>
+      <a href="#servicios">servicios</a>
+      <a href="#sobre-mi">about</a>
+      <a href="#contacto">contacto</a>
+      <div class="nav-status">disponible</div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="terminal-window">
+        <div class="terminal-bar">
+          <div class="t-btn red"></div>
+          <div class="t-btn yellow"></div>
+          <div class="t-btn green"></div>
+          <span class="t-title">~ tu.dev — bash</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line">
+            <span class="t-prompt">tu<span>@tijuana</span>:~$</span>
+            <span class="t-cmd">whoami</span>
+          </div>
+          <div class="t-name">
+            Tu<span class="accent">.</span>Dev
+          </div>
+          <div class="t-role">// Desarrollador web · Tijuana, B.C.</div>
+          <div class="t-spacer"></div>
+          <div class="t-line">
+            <span class="t-prompt">tu<span>@tijuana</span>:~$</span>
+            <span class="t-cmd">cat descripcion.txt</span>
+          </div>
+          <div class="t-out">Creo páginas web modernas para negocios locales en Tijuana.</div>
+          <div class="t-out">Stack actual, resultados reales, sin complicaciones.</div>
+          <div class="t-out dim">Actualmente ofreciendo servicios <span style="color:var(--green)">gratuitos</span> a negocios locales.</div>
+          <div class="t-spacer"></div>
+          <div class="t-line">
+            <span class="t-prompt">tu<span>@tijuana</span>:~$</span>
+            <span class="t-cmd">ls ./stack</span>
+          </div>
+          <div class="t-tags">
+            <span class="t-tag">next.js</span>
+            <span class="t-tag">react</span>
+            <span class="t-tag">vercel</span>
+            <span class="t-tag">supabase</span>
+            <span class="t-tag">stripe</span>
+            <span class="t-tag">github</span>
+            <span class="t-tag">html/css/js</span>
+          </div>
+          <div class="t-spacer"></div>
+          <div class="t-line">
+            <span class="t-prompt">tu<span>@tijuana</span>:~$</span>
+            <span class="t-cursor"></span>
+          </div>
+          <div class="hero-btns">
+            <a class="btn-term primary" href="#proyectos">./ver-proyectos</a>
+            <a class="btn-term ghost" href="#contacto">./contactar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PROYECTOS -->
+  <section id="proyectos">
+    <div class="container">
+      <div class="sec-header">
+        <div class="sec-label">proyectos</div>
+        <h2 class="sec-title">Trabajo real para Tijuana</h2>
+      </div>
+      <div class="projects-grid">
+
+        <div class="project-card">
+          <a href="https://restaurante-majo.vercel.app/" target="_blank" rel="noopener">
+            <div class="p-num">01 / restaurante</div>
+            <div class="p-top">
+              <div class="p-icon" style="font-family:var(--mono);font-size:0.75rem;color:var(--blue);">01</div>
+              <span class="p-arrow">↗</span>
+            </div>
+            <div class="p-title">Restaurante MAJO</div>
+            <div class="p-desc">Cocina mexicana en Garita de Otay, Tijuana. Menú, galería y contacto directo por llamada.</div>
+            <div class="p-techs">
+              <span class="p-tech">html</span>
+              <span class="p-tech">css</span>
+              <span class="p-tech">js</span>
+              <span class="p-tech">vercel</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="project-card">
+          <a href="https://purificadora-el-canon.vercel.app/" target="_blank" rel="noopener">
+            <div class="p-num">02 / negocio local</div>
+            <div class="p-top">
+              <div class="p-icon" style="font-family:var(--mono);font-size:0.75rem;color:var(--blue);">02</div>
+              <span class="p-arrow">↗</span>
+            </div>
+            <div class="p-title">Purificadora El Cañón</div>
+            <div class="p-desc">Agua purificada en Tijuana. Presentación de productos, precios y datos de contacto.</div>
+            <div class="p-techs">
+              <span class="p-tech">html</span>
+              <span class="p-tech">css</span>
+              <span class="p-tech">js</span>
+              <span class="p-tech">vercel</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="project-card">
+          <a href="https://papayafreshinc.vercel.app/" target="_blank" rel="noopener">
+            <div class="p-num">03 / empresa</div>
+            <div class="p-top">
+              <div class="p-icon" style="font-family:var(--mono);font-size:0.75rem;color:var(--blue);">03</div>
+              <span class="p-arrow">↗</span>
+            </div>
+            <div class="p-title">Papaya Fresh Inc</div>
+            <div class="p-desc">Sitio corporativo para empresa de productos frescos. Servicios y contacto profesional.</div>
+            <div class="p-techs">
+              <span class="p-tech">html</span>
+              <span class="p-tech">css</span>
+              <span class="p-tech">js</span>
+              <span class="p-tech">vercel</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="project-card">
+          <a href="https://colonet-website.vercel.app/" target="_blank" rel="noopener">
+            <div class="p-num">04 / sitio web</div>
+            <div class="p-top">
+              <div class="p-icon" style="font-family:var(--mono);font-size:0.75rem;color:var(--blue);">04</div>
+              <span class="p-arrow">↗</span>
+            </div>
+            <div class="p-title">Colonet Website</div>
+            <div class="p-desc">Diseño moderno y responsive, adaptado para móviles y desplegado en Vercel.</div>
+            <div class="p-techs">
+              <span class="p-tech">html</span>
+              <span class="p-tech">css</span>
+              <span class="p-tech">js</span>
+              <span class="p-tech">vercel</span>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SERVICIOS -->
+  <section id="servicios">
+    <div class="container">
+      <div class="sec-header">
+        <div class="sec-label">servicios</div>
+        <h2 class="sec-title">¿Qué puedo hacer por tu negocio?</h2>
+      </div>
+      <div class="services-grid">
+        <div class="svc-card">
+          <div class="svc-num">01.</div>
+          <h3>Página de presentación</h3>
+          <p>Sitio web profesional para mostrar tu negocio, servicios y datos de contacto. Ideal para empezar con presencia en línea.</p>
+        </div>
+        <div class="svc-card">
+          <div class="svc-num">02.</div>
+          <h3>Catálogo de productos</h3>
+          <p>Muestra tus productos o servicios de forma visual y ordenada. Con filtros y búsqueda si es necesario.</p>
+        </div>
+        <div class="svc-card">
+          <div class="svc-num">03.</div>
+          <h3>Pagos en línea</h3>
+          <p>Integración con Stripe para que tus clientes puedan pagarte directamente desde tu página web.</p>
+        </div>
+        <div class="svc-card">
+          <div class="svc-num">04.</div>
+          <h3>Base de datos</h3>
+          <p>Formularios, citas y pedidos guardados con Supabase. Tú ves todo desde un panel simple.</p>
+        </div>
+        <div class="svc-card">
+          <div class="svc-num">05.</div>
+          <h3>Algo más que necesites</h3>
+          <p>¿Tu negocio o proyecto necesita algo diferente? Platícame tu idea y vemos cómo hacerlo realidad.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SOBRE MI -->
+  <section id="sobre-mi">
+    <div class="container">
+      <div class="sec-header">
+        <div class="sec-label">about</div>
+        <h2 class="sec-title">Sobre mí</h2>
+      </div>
+      <div class="about-layout">
+        <div class="about-code">
+          <div class="code-bar">
+            <span>about.js</span>
+            <span class="lang">JavaScript</span>
+          </div>
+          <div class="code-body">
+            <div><span class="c-num">1</span><span class="c-kw">const</span> <span class="c-fn">dev</span> = {</div>
+            <div><span class="c-num">2</span>  <span class="c-prop">nombre</span>: <span class="c-str">"Oscar Perez"</span>,</div>
+            <div><span class="c-num">3</span>  <span class="c-prop">ciudad</span>: <span class="c-str">"Tijuana, B.C."</span>,</div>
+            <div><span class="c-num">4</span>  <span class="c-prop">disponible</span>: <span class="c-val">true</span>,</div>
+            <div><span class="c-num">5</span>  <span class="c-prop">precio</span>: <span class="c-str">"gratis"</span>,</div>
+            <div><span class="c-num">6</span>  <span class="c-prop">stack</span>: [</div>
+            <div><span class="c-num">7</span>    <span class="c-str">"Next.js"</span>, <span class="c-str">"Vercel"</span>,</div>
+            <div><span class="c-num">8</span>    <span class="c-str">"Supabase"</span>, <span class="c-str">"Stripe"</span></div>
+            <div><span class="c-num">9</span>  ],</div>
+            <div><span class="c-num">10</span> <span class="c-prop">objetivo</span>: <span class="c-str">"ayudar negocios</span></div>
+            <div><span class="c-num">11</span>   <span class="c-str">locales en Tijuana"</span></div>
+            <div><span class="c-num">12</span>};</div>
+            <div><span class="c-num">13</span></div>
+            <div><span class="c-num">14</span><span class="c-cm">// Cada proyecto = nueva habilidad</span></div>
+            <div><span class="c-num">15</span><span class="c-fn">console</span>.<span class="c-fn">log</span>(<span class="c-str">"Listo para trabajar"</span>);</div>
+          </div>
+        </div>
+        <div class="about-stats">
+          <div class="stat-row">
+            <div class="stat-val">18</div>
+            <div class="stat-label">Proyectos completados en Tijuana</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-val">$0</div>
+            <div class="stat-label">Costo de diseño y desarrollo</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-val">TIJ</div>
+            <div class="stat-label">Basado en Tijuana, B.C. México</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-val">∞</div>
+            <div class="stat-label">Ganas de aprender y colaborar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACTO -->
+  <section id="contacto">
+    <div class="container">
+      <div class="sec-header" style="text-align:center;">
+        <div class="sec-label" style="text-align:center;">contacto</div>
+        <h2 class="sec-title">¿Tienes un negocio en Tijuana?</h2>
+      </div>
+      <div class="contact-terminal">
+        <div class="terminal-bar">
+          <div class="t-btn red"></div>
+          <div class="t-btn yellow"></div>
+          <div class="t-btn green"></div>
+          <span class="t-title">contacto.sh</span>
+        </div>
+        <div style="padding:1rem 1.5rem; border-bottom:1px solid var(--border);">
+          <div class="t-line" style="margin:0;">
+            <span class="t-prompt">tu<span>@tijuana</span>:~$</span>
+            <span class="t-cmd">./contactar --negocio=tijuana</span>
+          </div>
+          <div class="t-out green" style="margin-top:0.4rem;">✓ Listo para platicar sobre tu proyecto</div>
+        </div>
+        <div class="contact-links-grid">
+          <a class="c-link" href="https://wa.me/526631261241" target="_blank">
+            <span class="c-icon">WA</span> WhatsApp
+            <span class="c-arrow">↗</span>
+          </a>
+          <a class="c-link" href="mailto:ozcarprez@gmail.com">
+            <span class="c-icon">@</span> Email
+            <span class="c-arrow">↗</span>
+          </a>
+          <a class="c-link" href="https://www.linkedin.com/in/ozcarprez/" target="_blank">
+            <span class="c-icon">in</span> LinkedIn
+            <span class="c-arrow">↗</span>
+          </a>
+          <a class="c-link" href="https://github.com/ozcarprez" target="_blank">
+            <span class="c-icon">gh</span> GitHub
+            <span class="c-arrow">↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>tu<span>.</span>dev — Tijuana, B.C.</span>
+    <span>© 2026</span>
+  </footer>
+
+</body>
+</html>
